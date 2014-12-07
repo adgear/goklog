@@ -55,3 +55,7 @@ func Fork(printers ...Printer) Printer {
 		}
 	})
 }
+
+func Keyf(format string, args ...interface{}) string {
+	return fmt.Sprintf(format, args...)
+}
