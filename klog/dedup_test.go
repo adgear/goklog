@@ -9,7 +9,8 @@ import (
 
 func TestDedup(t *testing.T) {
 	out := &TestPrinter{T: t}
-	dedup := Dedup{Rate: 10 * time.Millisecond, Next: out}
+	dedup := Dedup{Rate: 10 * time.Millisecond}
+	dedup.Chain(out)
 
 	dedup.Print(L("a", "x"))
 	dedup.Print(L("a", "x"))
@@ -103,7 +104,7 @@ func TestDedup(t *testing.T) {
 }
 
 func BenchmarkDedup_Const(b *testing.B) {
-	dedup := Dedup{Rate: 10 * time.Millisecond, Next: NilPrinter}
+	dedup := Dedup{Rate: 10 * time.Millisecond}
 	l := L("a", "x")
 
 	b.ResetTimer()
@@ -113,7 +114,7 @@ func BenchmarkDedup_Const(b *testing.B) {
 }
 
 func BenchmarkDedup_NoDup(b *testing.B) {
-	dedup := Dedup{Rate: 10 * time.Millisecond, Next: NilPrinter}
+	dedup := Dedup{Rate: 10 * time.Millisecond}
 	l0, l1 := L("a", "x"), L("a", "y")
 
 	b.ResetTimer()

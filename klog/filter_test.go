@@ -29,7 +29,8 @@ func DoFilterPrints(printer Printer) {
 
 func TestFilter_Out(t *testing.T) {
 	out := &TestPrinter{T: t}
-	filter := &Filter{Type: FilterOut, Next: out}
+	filter := &Filter{Type: FilterOut}
+	filter.Chain(out)
 
 	DoFilterPrints(filter)
 	out.ExpectOrdered(
@@ -104,7 +105,8 @@ func TestFilter_Out(t *testing.T) {
 
 func TestFilter_In(t *testing.T) {
 	out := &TestPrinter{T: t}
-	filter := &Filter{Type: FilterIn, Next: out}
+	filter := &Filter{Type: FilterIn}
+	filter.Chain(out)
 
 	DoFilterPrints(filter)
 	out.ExpectOrdered()
@@ -166,7 +168,7 @@ func TestFilter_In(t *testing.T) {
 }
 
 func BenchFilterKey(b *testing.B, n int) {
-	filter := &Filter{Type: FilterIn, Next: NilPrinter}
+	filter := &Filter{Type: FilterIn}
 	l := L("a", "x")
 
 	for i := 0; i < n; i++ {
@@ -192,7 +194,7 @@ const (
 )
 
 func BenchFilterPrefix(b *testing.B, n int, hit int) {
-	filter := &Filter{Type: FilterOut, Next: NilPrinter}
+	filter := &Filter{Type: FilterOut}
 	l := L("a", "x")
 
 	if hit != Miss {

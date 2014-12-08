@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// DefaultDedupRate is used when Dedup.Rate is left empty.
 const DefaultDedupRate = 1 * time.Second
 
 type dedupLine struct {
@@ -15,9 +16,13 @@ type dedupLine struct {
 	Count int
 }
 
+// Dedup aggregates multiple consecutive identical lines into a single line with
+// the number of time it was seen appended at the end. The first line
+// encountered is always dumped right away and only
 type Dedup struct {
+	Chained
+
 	Rate time.Duration
-	Next Printer
 
 	initialize sync.Once
 
@@ -25,8 +30,7 @@ type Dedup struct {
 	printC chan *Line
 }
 
-func NewDedup() *Dedup                  { return new(Dedup) }
-func (dedup *Dedup) Chain(next Printer) { dedup.Next = next }
+func NewDedup() *Dedup { return new(Dedup) }
 
 func (dedup *Dedup) Init() {
 	dedup.initialize.Do(dedup.init)
@@ -35,10 +39,6 @@ func (dedup *Dedup) Init() {
 func (dedup *Dedup) init() {
 	if dedup.Rate == 0 {
 		dedup.Rate = DefaultDedupRate
-	}
-
-	if dedup.Next == nil {
-		dedup.Next = NilPrinter
 	}
 
 	dedup.lines = make(map[string]*dedupLine)
@@ -62,7 +62,7 @@ func (dedup *Dedup) print(line *Line) {
 	if counter.Value != line.Value {
 		dedup.send(line.Key, counter)
 
-		dedup.Next.Print(line)
+		dedup.PrintNext(line)
 		counter.Count = 0
 		counter.Value = line.Value
 
@@ -91,7 +91,7 @@ func (dedup *Dedup) send(key string, counter *dedupLine) {
 		value = fmt.Sprintf("%s [%d times]", counter.Value, counter.Count)
 	}
 
-	dedup.Next.Print(&Line{Timestamp: time.Now(), Key: key, Value: value})
+	dedup.PrintNext(&Line{Timestamp: time.Now(), Key: key, Value: value})
 }
 
 func (dedup *Dedup) run() {

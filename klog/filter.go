@@ -30,13 +30,13 @@ type filterOp struct {
 }
 
 type Filter struct {
+	Chained
+
 	Type int
 
 	Keys     []string
 	Prefixes []string
 	Suffixes []string
-
-	Next Printer
 
 	initialize sync.Once
 
@@ -49,8 +49,7 @@ type Filter struct {
 	getC   chan chan map[string][]string
 }
 
-func NewFilter(def int) *Filter           { return &Filter{Type: def} }
-func (filter *Filter) Chain(next Printer) { filter.Next = next }
+func NewFilter(def int) *Filter { return &Filter{Type: def} }
 
 func (filter *Filter) Init() {
 	filter.initialize.Do(filter.init)
@@ -59,10 +58,6 @@ func (filter *Filter) Init() {
 func (filter *Filter) init() {
 	if filter.Type != FilterOut && filter.Type != FilterIn {
 		log.Panicf("invalid filter default '%d'", filter.Type)
-	}
-
-	if filter.Next == nil {
-		filter.Next = NilPrinter
 	}
 
 	filter.keys = set.NewString(filter.Keys...)
@@ -169,9 +164,9 @@ func (filter *Filter) print(line *Line) {
 	}
 
 	if filter.Type == FilterOut && !hit {
-		filter.Next.Print(line)
+		filter.PrintNext(line)
 	} else if filter.Type == FilterIn && hit {
-		filter.Next.Print(line)
+		filter.PrintNext(line)
 	}
 }
 
