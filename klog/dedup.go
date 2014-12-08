@@ -18,10 +18,13 @@ type dedupLine struct {
 
 // Dedup aggregates multiple consecutive identical lines into a single line with
 // the number of time it was seen appended at the end. The first line
-// encountered is always dumped right away and only
+// encountered is always printed right away and only subsequent identical lines
+// are held back prior to being printed. Held back line are printed at a set
+// configurable rate.
 type Dedup struct {
 	Chained
 
+	// Rate determines the interval at which duplicated lines are dumped.
 	Rate time.Duration
 
 	initialize sync.Once
@@ -30,8 +33,11 @@ type Dedup struct {
 	printC chan *Line
 }
 
+// NewDedup creates a new Dedup printer.
 func NewDedup() *Dedup { return new(Dedup) }
 
+// Init initializes the object. Note that calling this is optional since the
+// object is lazily initialized as needed.
 func (dedup *Dedup) Init() {
 	dedup.initialize.Do(dedup.init)
 }
@@ -47,6 +53,9 @@ func (dedup *Dedup) init() {
 	go dedup.run()
 }
 
+// Print checks the line checking for duplicates. If the line was never seen
+// before it is passed to the chained printer right away otherwise it is held
+// back and counted.
 func (dedup *Dedup) Print(line *Line) {
 	dedup.Init()
 	dedup.printC <- line

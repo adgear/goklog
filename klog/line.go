@@ -7,12 +7,14 @@ import (
 	"time"
 )
 
+// Line represents a line to be printed by a printer pipeline.
 type Line struct {
 	Timestamp time.Time `json:"ts"`
 	Key       string    `json:"key"`
 	Value     string    `json:"val"`
 }
 
+// String returns a string representation of the line.
 func (line *Line) String() string {
 	return fmt.Sprintf("%s <%s> %s", line.Timestamp, line.Key, line.Value)
 }

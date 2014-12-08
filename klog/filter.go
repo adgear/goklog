@@ -11,8 +11,13 @@ import (
 )
 
 const (
+	// FilterOut indicates that by default all keys are allowed and that any keys
+	// that hit on the filter will be discarded.
 	FilterOut = 1
-	FilterIn  = 2
+
+	// FilterIn indicates that by default all keys are discarded and that only
+	// keys that hit on the filter will be kept.
+	FilterIn = 2
 )
 
 const (
@@ -29,13 +34,21 @@ type filterOp struct {
 	Value string
 }
 
+// Filter can filter a line stream on the key of each line and discard any
+// undesired lines. Filters can either be a full, prefix or suffix string match.
 type Filter struct {
 	Chained
 
+	// Type is either FilterOut or FilterIn.
 	Type int
 
-	Keys     []string
+	// Keys is the initial set of keys that will be used for full-key matches.
+	Keys []string
+
+	// Prefixes is the initial set of patterns use for prefix matches.
 	Prefixes []string
+
+	// Suffixes is the initial set of patterns use for suffix matches.
 	Suffixes []string
 
 	initialize sync.Once
@@ -49,8 +62,11 @@ type Filter struct {
 	getC   chan chan map[string][]string
 }
 
+// NewFilter creates a new Filter configured to either FilterIn or FilterOut.
 func NewFilter(def int) *Filter { return &Filter{Type: def} }
 
+// Init initializes the filter. Calling this is optional since the object is
+// lazily initialized as needed.
 func (filter *Filter) Init() {
 	filter.initialize.Do(filter.init)
 }
@@ -71,6 +87,7 @@ func (filter *Filter) init() {
 	go filter.run()
 }
 
+// Add adds the given pattern to be used as a full-key match.
 func (filter *Filter) Add(values ...string) *Filter {
 	filter.Init()
 
@@ -81,6 +98,7 @@ func (filter *Filter) Add(values ...string) *Filter {
 	return filter
 }
 
+// Remove removes the given pattern to be used as a full-key match.
 func (filter *Filter) Remove(values ...string) *Filter {
 	filter.Init()
 
@@ -91,6 +109,7 @@ func (filter *Filter) Remove(values ...string) *Filter {
 	return filter
 }
 
+// AddPrefix adds the given pattern to be used as a prefix match.
 func (filter *Filter) AddPrefix(prefixes ...string) *Filter {
 	filter.Init()
 
@@ -101,6 +120,7 @@ func (filter *Filter) AddPrefix(prefixes ...string) *Filter {
 	return filter
 }
 
+// RemovePrefix removes the given pattern to be used as a prefix match.
 func (filter *Filter) RemovePrefix(prefixes ...string) *Filter {
 	filter.Init()
 
@@ -111,6 +131,7 @@ func (filter *Filter) RemovePrefix(prefixes ...string) *Filter {
 	return filter
 }
 
+// AddSuffix adds the given pattern to be used as a suffix match.
 func (filter *Filter) AddSuffix(suffixes ...string) *Filter {
 	filter.Init()
 
@@ -121,6 +142,7 @@ func (filter *Filter) AddSuffix(suffixes ...string) *Filter {
 	return filter
 }
 
+// RemoveSuffix removes the given pattern to be used as a suffix match.
 func (filter *Filter) RemoveSuffix(suffixes ...string) *Filter {
 	filter.Init()
 
@@ -131,6 +153,7 @@ func (filter *Filter) RemoveSuffix(suffixes ...string) *Filter {
 	return filter
 }
 
+// Get returns the list of active filters.
 func (filter *Filter) Get() map[string][]string {
 	filter.Init()
 
@@ -139,6 +162,9 @@ func (filter *Filter) Get() map[string][]string {
 	return <-resultC
 }
 
+// Print forwards the line to the next printer if the filter is of type FilterIn
+// and at least one of the patterns match the key or if the filter is of type
+// FilterOut and none of the patterns match the key.
 func (filter *Filter) Print(line *Line) {
 	filter.Init()
 	filter.printC <- line

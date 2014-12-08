@@ -6,17 +6,26 @@ import (
 	"github.com/datacratic/gorest/rest"
 )
 
+// RingREST provides the REST interface for the Ring printer.
 type RingREST struct {
 	*Ring
+
+	// PathPrefix will be preprended to all the REST paths. Defaults to
+	// DefaultPathREST.
 	PathPrefix string
 }
 
+// NewRingREST creates a new REST enabled Ring printer at the specified path
+// with the given size. If path is empty then DefaultPathREST will be used
+// instead.
 func NewRingREST(path string, size int) *RingREST {
 	ring := &RingREST{Ring: NewRing(size), PathPrefix: path}
 	rest.AddService(ring)
 	return ring
 }
 
+// RESTRoutes returns the set of gorest routes used to manipulate the Ring
+// printer.
 func (ring *RingREST) RESTRoutes() rest.Routes {
 	prefix := ring.PathPrefix
 	if len(prefix) == 0 {
