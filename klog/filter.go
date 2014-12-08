@@ -76,34 +76,64 @@ func (filter *Filter) init() {
 	go filter.run()
 }
 
-func (filter *Filter) Add(value string) {
+func (filter *Filter) Add(values ...string) *Filter {
 	filter.Init()
-	filter.opC <- filterOp{filterAdd, value}
+
+	for _, value := range values {
+		filter.opC <- filterOp{filterAdd, value}
+	}
+
+	return filter
 }
 
-func (filter *Filter) Remove(value string) {
+func (filter *Filter) Remove(values ...string) *Filter {
 	filter.Init()
-	filter.opC <- filterOp{filterRemove, value}
+
+	for _, value := range values {
+		filter.opC <- filterOp{filterRemove, value}
+	}
+
+	return filter
 }
 
-func (filter *Filter) AddPrefix(prefix string) {
+func (filter *Filter) AddPrefix(prefixes ...string) *Filter {
 	filter.Init()
-	filter.opC <- filterOp{filterAddPrefix, prefix}
+
+	for _, prefix := range prefixes {
+		filter.opC <- filterOp{filterAddPrefix, prefix}
+	}
+
+	return filter
 }
 
-func (filter *Filter) RemovePrefix(prefix string) {
+func (filter *Filter) RemovePrefix(prefixes ...string) *Filter {
 	filter.Init()
-	filter.opC <- filterOp{filterRemovePrefix, prefix}
+
+	for _, prefix := range prefixes {
+		filter.opC <- filterOp{filterRemovePrefix, prefix}
+	}
+
+	return filter
 }
 
-func (filter *Filter) AddSuffix(suffix string) {
+func (filter *Filter) AddSuffix(suffixes ...string) *Filter {
 	filter.Init()
-	filter.opC <- filterOp{filterAddSuffix, suffix}
+
+	for _, suffix := range suffixes {
+		filter.opC <- filterOp{filterAddSuffix, suffix}
+	}
+
+	return filter
 }
 
-func (filter *Filter) RemoveSuffix(suffix string) {
+func (filter *Filter) RemoveSuffix(suffixes ...string) *Filter {
 	filter.Init()
-	filter.opC <- filterOp{filterRemoveSuffix, suffix}
+
+	for _, suffix := range suffixes {
+		filter.opC <- filterOp{filterRemoveSuffix, suffix}
+	}
+
+	return filter
 }
 
 func (filter *Filter) Get() map[string][]string {
