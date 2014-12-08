@@ -1,19 +1,18 @@
 // Copyright (c) 2014 Datacratic. All rights reserved.
 
-package klogr
+package klog
 
 import (
-	"github.com/datacratic/goklog/klog"
 	"github.com/datacratic/gorest/rest"
 )
 
 type RestFilter struct {
-	*klog.Filter
+	*Filter
 	PathPrefix string
 }
 
 func NewRestFilter(path string, def int) *RestFilter {
-	filter := &RestFilter{Filter: klog.NewFilter(def), PathPrefix: path}
+	filter := &RestFilter{Filter: NewFilter(def), PathPrefix: path}
 	rest.AddService(filter)
 	return filter
 }
@@ -21,7 +20,7 @@ func NewRestFilter(path string, def int) *RestFilter {
 func (filter *RestFilter) RESTRoutes() rest.Routes {
 	prefix := filter.PathPrefix
 	if len(prefix) == 0 {
-		prefix = DefaultPath + "/filter"
+		prefix = DefaultRestPath + "/filter"
 	}
 
 	return []*rest.Route{

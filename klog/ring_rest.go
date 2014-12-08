@@ -1,19 +1,18 @@
 // Copyright (c) 2014 Datacratic. All rights reserved.
 
-package klogr
+package klog
 
 import (
-	"github.com/datacratic/goklog/klog"
 	"github.com/datacratic/gorest/rest"
 )
 
 type RestRing struct {
-	*klog.Ring
+	*Ring
 	PathPrefix string
 }
 
 func NewRestRing(path string, size int) *RestRing {
-	ring := &RestRing{Ring: klog.NewRing(size), PathPrefix: path}
+	ring := &RestRing{Ring: NewRing(size), PathPrefix: path}
 	rest.AddService(ring)
 	return ring
 }
@@ -21,7 +20,7 @@ func NewRestRing(path string, size int) *RestRing {
 func (ring *RestRing) RESTRoutes() rest.Routes {
 	prefix := ring.PathPrefix
 	if len(prefix) == 0 {
-		prefix = DefaultPath + "/ring"
+		prefix = DefaultRestPath + "/ring"
 	}
 
 	return []*rest.Route{
