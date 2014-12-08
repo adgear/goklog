@@ -6,21 +6,21 @@ import (
 	"github.com/datacratic/gorest/rest"
 )
 
-type RestRing struct {
+type RingREST struct {
 	*Ring
 	PathPrefix string
 }
 
-func NewRestRing(path string, size int) *RestRing {
-	ring := &RestRing{Ring: NewRing(size), PathPrefix: path}
+func NewRingREST(path string, size int) *RingREST {
+	ring := &RingREST{Ring: NewRing(size), PathPrefix: path}
 	rest.AddService(ring)
 	return ring
 }
 
-func (ring *RestRing) RESTRoutes() rest.Routes {
+func (ring *RingREST) RESTRoutes() rest.Routes {
 	prefix := ring.PathPrefix
 	if len(prefix) == 0 {
-		prefix = DefaultRestPath + "/ring"
+		prefix = DefaultPathREST + "/ring"
 	}
 
 	return []*rest.Route{

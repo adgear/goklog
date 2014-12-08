@@ -6,21 +6,21 @@ import (
 	"github.com/datacratic/gorest/rest"
 )
 
-type RestFilter struct {
+type FilterREST struct {
 	*Filter
 	PathPrefix string
 }
 
-func NewRestFilter(path string, def int) *RestFilter {
-	filter := &RestFilter{Filter: NewFilter(def), PathPrefix: path}
+func NewFilterREST(path string, def int) *FilterREST {
+	filter := &FilterREST{Filter: NewFilter(def), PathPrefix: path}
 	rest.AddService(filter)
 	return filter
 }
 
-func (filter *RestFilter) RESTRoutes() rest.Routes {
+func (filter *FilterREST) RESTRoutes() rest.Routes {
 	prefix := filter.PathPrefix
 	if len(prefix) == 0 {
-		prefix = DefaultRestPath + "/filter"
+		prefix = DefaultPathREST + "/filter"
 	}
 
 	return []*rest.Route{

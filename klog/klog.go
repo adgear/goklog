@@ -4,4 +4,4 @@ package klog
 
 const DefaultBufferC = 8
 
-const DefaultRestPath = "/debug/klog"
+const DefaultPathREST = "/debug/klog"
