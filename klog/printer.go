@@ -21,8 +21,12 @@ func (fn PrinterFunc) Print(line *Line) { fn(line) }
 // NilPrinter is a noop printer.
 var NilPrinter = PrinterFunc(func(line *Line) {})
 
-// DefaultPrinter is the default printer used by klog.
+// DefaultPrinter is the default printer used by the kprint functions in klog.
 var DefaultPrinter = PrinterFunc(LogPrinter)
+
+// DefaultPrinter is the default printer used by the kfatal and kpanic functions
+// in klog.
+var DefaultFatalPrinter = PrinterFunc(LogPrinter)
 
 // LogPrinter is forwards all lines to the golang standard log library.
 func LogPrinter(line *Line) { log.Printf("<%s> %s", line.Key, line.Value) }
