@@ -16,7 +16,7 @@ type Logger struct {
 
 // New creates a new Logger which outputs to the given printer.
 func New(next Printer, fatal Printer) *Logger {
-	return &Logger{Chained: Chained{Next: next}}
+	return &Logger{Chained: Chained{Next: next}, Fatal: fatal}
 }
 
 func (logger *Logger) kprint(key, value string) {
