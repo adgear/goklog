@@ -3,6 +3,10 @@
 package klog_test
 
 import (
+	"encoding/json"
+	"strings"
+	"time"
+
 	"github.com/datacratic/goklog/klog"
 
 	"fmt"
@@ -73,8 +77,44 @@ func Example_Pipeline() {
 		fmt.Println(<-linesC)
 	}
 
+	chanPrinter = func(line *klog.Line) {
+
+		split := strings.Split(line.Key, ".")
+		var level string
+		if len(split) > 0 {
+			level = split[len(split)-1]
+		}
+		line.Key = strings.Join(split[:len(split)-1], ".")
+		var ts time.Time
+		line.Timestamp = ts
+
+		sLine := struct {
+			*klog.Line
+			Level string `json:"level"`
+		}{
+			Line:  line,
+			Level: level,
+		}
+
+		if js, err := json.Marshal(sLine); err != nil {
+			log.Printf("line json marshal error: %s", err)
+
+			linesC <- fmt.Sprintf("%s", err)
+		} else {
+			linesC <- fmt.Sprintf("@cee: %s", js)
+		}
+	}
+	klog.SetPrinter(
+		klog.Chain(filter,
+			klog.Chain(dedup,
+				klog.PrinterFunc(chanPrinter))))
+	klog.KPrint("test.error", "structured")
+
+	fmt.Println(<-linesC)
+
 	// Output:
 	// <test.info> hello
 	// <test.info> hello [2 times]
 	// <test.info> world
+	// @cee: {"ts":"0001-01-01T00:00:00Z","key":"test","val":"structured","level":"error"}
 }
